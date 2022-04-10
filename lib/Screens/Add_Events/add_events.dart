@@ -13,6 +13,7 @@ class AddEvents extends StatefulWidget {
 }
 
 class _AddEventsState extends State<AddEvents> {
+  final formKey = GlobalKey<FormState>();
   String newEventTitle = '';
   String newEventDescription = '';
   String newEventVenue = '';
@@ -24,18 +25,25 @@ class _AddEventsState extends State<AddEvents> {
     return Column(
       children: [
         TextFormField(
-            minLines: 1,
-            maxLines: null,
-            decoration: InputDecoration(
-              labelText: "Title",
-              labelStyle:
-                  TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
-            ),
-            onChanged: (value) => setState(() {
-                  newEventTitle = value;
-                })),
+          minLines: 1,
+          maxLines: null,
+          decoration: InputDecoration(
+            labelText: "Title",
+            labelStyle:
+                TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+            border:
+                OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+          ),
+          onSaved: (value) => setState(() {
+            newEventTitle = value!;
+          }),
+          validator: (value) {
+            if (value!.isEmpty) {
+              return "Please put title";
+            }
+            return null;
+          },
+        ),
         SizedBox(
           height: 10.0,
         )
@@ -56,6 +64,15 @@ class _AddEventsState extends State<AddEvents> {
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
           ),
+          onSaved: (value) {
+            newEventDescription = value!;
+          },
+          validator: (value) {
+            if (value!.isEmpty) {
+              return "Please put description";
+            }
+            return null;
+          },
         ),
         SizedBox(
           height: 10.0,
@@ -75,6 +92,15 @@ class _AddEventsState extends State<AddEvents> {
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
           ),
+          onSaved: (value) {
+            newEventVenue = value!;
+          },
+          validator: (value) {
+            if (value!.isEmpty) {
+              return "Please put vanue";
+            }
+            return null;
+          },
         ),
         SizedBox(
           height: 10.0,
@@ -306,11 +332,32 @@ class _AddEventsState extends State<AddEvents> {
   Widget buildUpdateButton() {
     return ElevatedButton(
       onPressed: () {
-        Navigator.pushNamed(context, '/home');
+        //Navigator.pushNamed(context, '/home');
         // Navigator.pushReplacement(
         //     context,
         //     MaterialPageRoute(
         //         builder: (context) => HomePage()));
+        final isValid = formKey.currentState!.validate();
+        if (isValid) {
+          formKey.currentState!.save();
+
+          final message = "Updated";
+          final updateSnackBar = SnackBar(
+            content: Text(
+              message,
+              style: TextStyle(fontSize: 20.0),
+            ),
+            backgroundColor: Colors.green,
+          );
+          ScaffoldMessenger.of(context).showSnackBar(updateSnackBar);
+        }
+
+        print(newEventTitle);
+        print(newEventDescription);
+        print(newEventVenue);
+        print(selectedDate);
+        print(selectedTime);
+        print(selectedTimeZone);
       },
       child: Text("Update"),
     );
@@ -324,6 +371,7 @@ class _AddEventsState extends State<AddEvents> {
         padding: EdgeInsets.all(10.0),
         child: SingleChildScrollView(
             child: Form(
+          key: formKey,
           child: Column(
             children: <Widget>[
               buildTitle(),

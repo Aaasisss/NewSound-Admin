@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:newsound_admin/Screens/Home/home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -10,10 +8,12 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final formKey = GlobalKey<FormState>();
   //controllers
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
+  //foucs nodes that are used later to change the focus to different fields
   final focusNode_email = FocusNode();
   final focusNode_password = FocusNode();
   final focusNode_signInButton = FocusNode();
@@ -29,7 +29,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget buildLogo() {
-    return CircleAvatar(
+    return const CircleAvatar(
       radius: 70,
       backgroundImage: AssetImage(
         "lib/Images/logo.png",
@@ -47,6 +47,7 @@ class _LoginPageState extends State<LoginPage> {
           controller: emailController,
           focusNode: focusNode_email,
           keyboardType: TextInputType.emailAddress,
+          //autovalidateMode: AutovalidateMode.onUserInteraction,
           decoration: InputDecoration(
             labelText: "Email",
             hintText: "example1@gmail.com",
@@ -65,13 +66,21 @@ class _LoginPageState extends State<LoginPage> {
             FocusScope.of(context).requestFocus(focusNode_password);
           },
           validator: (value) {
+            const pattern =
+                r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)';
+            final regExp = RegExp(pattern);
+
             if (value!.isEmpty) {
               return "write admin email";
+            } else if (!regExp.hasMatch(value)) {
+              return "Enter valid email";
             }
+
+            return null;
           },
           onSaved: (value) {},
         ),
-        SizedBox(
+        const SizedBox(
           height: 10.0,
         )
       ],
@@ -90,10 +99,10 @@ class _LoginPageState extends State<LoginPage> {
               borderRadius: BorderRadius.circular(10.0),
             ),
             suffixIcon: passwordController.text.isEmpty
-                ? Icon(Icons.lock)
+                ? const Icon(Icons.lock)
                 : isPasswordVisible
                     ? IconButton(
-                        icon: Icon(Icons.visibility),
+                        icon: const Icon(Icons.visibility),
                         onPressed: () {
                           setState(() {
                             isPasswordVisible = !isPasswordVisible;
@@ -101,7 +110,7 @@ class _LoginPageState extends State<LoginPage> {
                         },
                       )
                     : IconButton(
-                        icon: Icon(Icons.visibility_off),
+                        icon: const Icon(Icons.visibility_off),
                         onPressed: () {
                           setState(() {
                             isPasswordVisible = !isPasswordVisible;
@@ -123,7 +132,7 @@ class _LoginPageState extends State<LoginPage> {
           },
           onSaved: (value) {},
         ),
-        SizedBox(
+        const SizedBox(
           height: 10.0,
         )
       ],
@@ -136,27 +145,50 @@ class _LoginPageState extends State<LoginPage> {
       onPressed: () {
         print(emailController.text);
         print(passwordController.text);
+
+        final isValid = formKey.currentState!.validate();
+        if (isValid) {
+          formKey.currentState!.save();
+
+          const message = "Signing In...";
+          final updateSnackBar = SnackBar(
+            content: Row(
+              children: const [
+                CircularProgressIndicator(
+                  color: Colors.blue,
+                ),
+                SizedBox(width: 10.0),
+                Text(
+                  message,
+                  style: TextStyle(fontSize: 20.0),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green,
+          );
+          ScaffoldMessenger.of(context).showSnackBar(updateSnackBar);
+        }
       },
-      child: Text("Sign In"),
+      child: const Text("Sign In"),
     );
   }
 
   Widget buildForgotPassword() {
     return TextButton(
       onPressed: () {},
-      child: Text("Forgot Password?"),
+      child: const Text("Forgot Password?"),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Center(child: Text("Admin Login"))),
+      appBar: AppBar(title: const Center(child: Text("Admin Login"))),
       body: Container(
         height: double.infinity,
         width: double.infinity,
-        padding: EdgeInsets.all(10.0),
-        decoration: BoxDecoration(
+        padding: const EdgeInsets.all(10.0),
+        decoration: const BoxDecoration(
             gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -173,9 +205,9 @@ class _LoginPageState extends State<LoginPage> {
             children: <Widget>[
               buildLogo(),
               Container(
-                padding: EdgeInsets.all(10.0),
+                padding: const EdgeInsets.all(10.0),
                 child: Container(
-                  padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
+                  padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
                   decoration: BoxDecoration(
                     border: Border.all(
                       color: Colors.black,
@@ -183,15 +215,16 @@ class _LoginPageState extends State<LoginPage> {
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                   child: Form(
+                    key: formKey,
                     child: Column(
                       children: [
-                        Padding(padding: EdgeInsets.all(10.0)),
-                        Text(
+                        const Padding(padding: EdgeInsets.all(10.0)),
+                        const Text(
                           "Sign in as Admin",
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 30.0),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 20.0,
                         ),
                         buildEmail(),
