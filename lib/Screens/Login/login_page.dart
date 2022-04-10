@@ -10,26 +10,45 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  //controllers
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  //to control password visibility and this icons accordingly
+  bool isPasswordVisible = false;
+
+  @override
+  initState() {
+    super.initState();
+
+    emailController.addListener(() => setState(() {}));
+    passwordController.addListener(() => setState(() {}));
+  }
+
   Widget buildEmail() {
     return Column(
       children: [
-        ListTile(
-          shape: RoundedRectangleBorder(
+        TextFormField(
+          controller: emailController,
+          keyboardType: TextInputType.emailAddress,
+          decoration: InputDecoration(
+            labelText: "Email",
+            hintText: "example1@gmail.com",
+            suffixIcon: emailController.text.isEmpty
+                ? Icon(Icons.email)
+                : IconButton(
+                    icon: Icon(Icons.close),
+                    onPressed: () => emailController.clear(),
+                  ),
+            border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10.0),
-              side: BorderSide(color: Colors.black, width: 1)),
-          title: TextFormField(
-            decoration: InputDecoration(
-                labelText: "Email",
-                border: InputBorder.none,
-                hintText: "example1@gmail.com"),
-            validator: (value) {
-              if (value!.isEmpty) {
-                return "write admin email";
-              }
-            },
-            onSaved: (value) {},
+            ),
           ),
-          trailing: Icon(Icons.email),
+          validator: (value) {
+            if (value!.isEmpty) {
+              return "write admin email";
+            }
+          },
+          onSaved: (value) {},
         ),
         SizedBox(
           height: 10.0,
@@ -41,24 +60,42 @@ class _LoginPageState extends State<LoginPage> {
   Widget buildPassword() {
     return Column(
       children: [
-        ListTile(
-          shape: RoundedRectangleBorder(
+        TextFormField(
+          controller: passwordController,
+          decoration: InputDecoration(
+            labelText: "Password",
+            border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10.0),
-              side: BorderSide(color: Colors.black, width: 1)),
-          title: TextFormField(
-            decoration: InputDecoration(
-                labelText: "Password", border: InputBorder.none),
-            obscureText: true,
-            autocorrect: false,
-            enableSuggestions: false,
-            validator: (value) {
-              if (value!.isEmpty) {
-                return "write admin password";
-              }
-            },
-            onSaved: (value) {},
+            ),
+            suffixIcon: passwordController.text.isEmpty
+                ? Icon(Icons.lock)
+                : isPasswordVisible
+                    ? IconButton(
+                        icon: Icon(Icons.visibility),
+                        onPressed: () {
+                          setState(() {
+                            isPasswordVisible = !isPasswordVisible;
+                          });
+                        },
+                      )
+                    : IconButton(
+                        icon: Icon(Icons.visibility_off),
+                        onPressed: () {
+                          setState(() {
+                            isPasswordVisible = !isPasswordVisible;
+                          });
+                        },
+                      ),
           ),
-          trailing: Icon(Icons.lock),
+          obscureText: !isPasswordVisible,
+          autocorrect: false,
+          enableSuggestions: false,
+          validator: (value) {
+            if (value!.isEmpty) {
+              return "write admin password";
+            }
+          },
+          onSaved: (value) {},
         ),
         SizedBox(
           height: 10.0,
@@ -70,11 +107,13 @@ class _LoginPageState extends State<LoginPage> {
   Widget buildSignInButton() {
     return ElevatedButton(
       onPressed: () {
-        Navigator.pushNamed(context, '/home');
+        //Navigator.pushNamed(context, '/home');
         // Navigator.pushReplacement(
         //     context,
         //     MaterialPageRoute(
         //         builder: (context) => HomePage()));
+        print(emailController.text);
+        print(passwordController.text);
       },
       child: Text("Sign In"),
     );
