@@ -30,10 +30,13 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget buildLogo() {
     return CircleAvatar(
-      radius: 50,
+      radius: 70,
       backgroundImage: AssetImage(
         "lib/Images/logo.png",
       ),
+      // foregroundImage: AssetImage(
+      //   "lib/Images/pasters.png",
+      // ),
     );
   }
 
