@@ -23,21 +23,6 @@ class _AddEventsState extends State<AddEvents> {
   Widget buildTitle() {
     return Column(
       children: [
-        // ListTile(
-        //   shape: RoundedRectangleBorder(
-        //       borderRadius: BorderRadius.circular(10.0),
-        //       side: BorderSide(color: Colors.black, width: 1)),
-        //   title: TextField(
-        //       decoration: InputDecoration(
-        //         labelText: "Title",
-        //         labelStyle:
-        //             TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
-        //         border: InputBorder.none,
-        //       ),
-        //       onChanged: (value) => setState(() {
-        //             newEventTitle = value;
-        //           })),
-        // ),
         TextFormField(
             minLines: 1,
             maxLines: null,
