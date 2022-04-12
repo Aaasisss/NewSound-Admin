@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'New Sound Admin App',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const HomePage(),
+      home: const LoginPage(),
       routes: approute,
     );
   }
