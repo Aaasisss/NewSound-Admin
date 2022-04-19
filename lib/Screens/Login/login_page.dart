@@ -167,6 +167,8 @@ class _LoginPageState extends State<LoginPage> {
             backgroundColor: Colors.green,
           );
           ScaffoldMessenger.of(context).showSnackBar(updateSnackBar);
+
+          Navigator.of(context).pushNamed("/home");
         }
       },
       child: const Text("Sign In"),
