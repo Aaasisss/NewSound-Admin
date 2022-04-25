@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:newsound_admin/Services/auth.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -149,29 +151,50 @@ class _LoginPageState extends State<LoginPage> {
         final isValid = formKey.currentState!.validate();
         if (isValid) {
           formKey.currentState!.save();
+          AuthServive().signInWithEmail(
+              emailController.text.trim(), passwordController.text.trim());
 
-          const message = "Signing In...";
-          final updateSnackBar = SnackBar(
-            content: Row(
-              children: const [
-                CircularProgressIndicator(
-                  color: Colors.blue,
-                ),
-                SizedBox(width: 10.0),
-                Text(
-                  message,
-                  style: TextStyle(fontSize: 20.0),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.green,
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => Center(child: CircularProgressIndicator()),
           );
-          ScaffoldMessenger.of(context).showSnackBar(updateSnackBar);
-
-          Navigator.of(context).pushNamed("/home");
         }
       },
-      child: const Text("Sign In"),
+      child: const Text(
+        "Sign In",
+        style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  Widget buildSignInOptions() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        IconButton(
+            onPressed: () {
+              AuthServive().signInWithGoogle();
+
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) =>
+                    Center(child: CircularProgressIndicator()),
+              );
+            },
+            icon: FaIcon(
+              FontAwesomeIcons.google,
+              size: 30.0,
+            )),
+        IconButton(
+            onPressed: () {},
+            icon: FaIcon(
+              FontAwesomeIcons.apple,
+              size: 30.0,
+            )),
+      ],
     );
   }
 
@@ -232,6 +255,7 @@ class _LoginPageState extends State<LoginPage> {
                         buildEmail(),
                         buildPassword(),
                         buildSignInButton(),
+                        buildSignInOptions(),
                         buildForgotPassword(),
                       ],
                     ),

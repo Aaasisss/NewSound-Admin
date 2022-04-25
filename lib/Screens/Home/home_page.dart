@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:newsound_admin/Screens/Home/homepage_items.dart';
+import 'package:newsound_admin/Services/auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -11,6 +14,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
+    var user = FirebaseAuth.instance.currentUser;
     return Scaffold(
       appBar: AppBar(
         title: Center(
@@ -31,14 +35,26 @@ class _HomePageState extends State<HomePage> {
               Color(0xff5ac18e),
             ])),
         padding: EdgeInsets.all(50.0),
-        child: ListView.builder(
-            itemCount: homepageItemList.length,
-            itemBuilder: (BuildContext context, int index) {
-              return Container(
-                margin: EdgeInsets.all(10.0),
-                child: homepageItemList[index],
-              );
-            }),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Flexible(
+              child: ListView.builder(
+                  itemCount: homepageItemList.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Container(
+                      margin: EdgeInsets.all(10.0),
+                      child: homepageItemList[index],
+                    );
+                  }),
+            ),
+            Text("Signed in as ${user!.displayName}"),
+            ElevatedButton(
+              onPressed: AuthServive().signOut,
+              child: Text("Sign Out"),
+            ),
+          ],
+        ),
       ),
     );
   }
