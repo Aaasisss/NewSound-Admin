@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:newsound_admin/Services/auth.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -169,31 +170,43 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget buildSignInOptions() {
-    return Row(
+    return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        IconButton(
-            onPressed: () {
-              AuthServive().signInWithGoogle();
+        ElevatedButton.icon(
+          onPressed: () {
+            AuthServive().signInWithGoogle();
 
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (context) =>
-                    Center(child: CircularProgressIndicator()),
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => Center(child: CircularProgressIndicator()),
+            );
+          },
+          icon: FaIcon(
+            FontAwesomeIcons.google,
+            size: 30.0,
+          ),
+          label: Text("sign in with Google"),
+        ),
+        FutureBuilder<Object>(
+          future: SignInWithApple.isAvailable(),
+          builder: (context, snapshot) {
+            if (snapshot.data == true) {
+              return ElevatedButton.icon(
+                onPressed: AuthServive().signInWithApple,
+                icon: FaIcon(
+                  FontAwesomeIcons.apple,
+                  size: 30.0,
+                ),
+                label: Text("sign in with Apple"),
               );
-            },
-            icon: FaIcon(
-              FontAwesomeIcons.google,
-              size: 30.0,
-            )),
-        IconButton(
-            onPressed: () {},
-            icon: FaIcon(
-              FontAwesomeIcons.apple,
-              size: 30.0,
-            )),
+            } else {
+              return Container();
+            }
+          },
+        ),
       ],
     );
   }
