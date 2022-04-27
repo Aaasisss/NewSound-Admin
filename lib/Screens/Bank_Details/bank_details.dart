@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BankDetails extends StatefulWidget {
   const BankDetails({Key? key}) : super(key: key);
@@ -9,11 +10,19 @@ class BankDetails extends StatefulWidget {
 
 class _BankDetailsState extends State<BankDetails> {
   final formKey = GlobalKey<FormState>();
+  final accountNameController = TextEditingController();
+  final accountBsbController = TextEditingController();
+  final accountNumberController = TextEditingController();
+  String currentAccountName = '';
+  String currentAccountBsb = '';
+  String currentAccountNumber = '';
+  final _firestore = FirebaseFirestore.instance.collection('bankAccountDetail');
 
   Widget buildAccountName() {
     return Column(
       children: [
         TextFormField(
+          controller: accountNameController,
           minLines: 1,
           maxLines: null,
           decoration: InputDecoration(
@@ -44,6 +53,7 @@ class _BankDetailsState extends State<BankDetails> {
     return Column(
       children: [
         TextFormField(
+          controller: accountBsbController,
           minLines: 1,
           maxLines: null,
           keyboardType: TextInputType.number,
@@ -75,6 +85,7 @@ class _BankDetailsState extends State<BankDetails> {
     return Column(
       children: [
         TextFormField(
+          controller: accountNumberController,
           minLines: 1,
           maxLines: null,
           keyboardType: TextInputType.number,
@@ -104,28 +115,110 @@ class _BankDetailsState extends State<BankDetails> {
 
   Widget buildUpdateButton() {
     return ElevatedButton(
-      onPressed: () {
-        //Navigator.pushNamed(context, '/home');
-        // Navigator.pushReplacement(
-        //     context,
-        //     MaterialPageRoute(
-        //         builder: (context) => HomePage()));
+      onPressed: () async {
         final isValid = formKey.currentState!.validate();
         if (isValid) {
           formKey.currentState!.save();
 
-          final message = "Updated";
-          final updateSnackBar = SnackBar(
-            content: Text(
-              message,
-              style: TextStyle(fontSize: 20.0),
-            ),
-            backgroundColor: Colors.green,
-          );
-          ScaffoldMessenger.of(context).showSnackBar(updateSnackBar);
+          try {
+            await _firestore.doc('accountDetails').set({
+              'number': accountNumberController.text.trim(),
+              'bsb': accountBsbController.text.trim(),
+              'name': accountNameController.text.trim()
+            });
+            final message = "Updated";
+            final updateSnackBar = SnackBar(
+              content: Text(
+                message,
+                style: TextStyle(fontSize: 20.0),
+              ),
+              backgroundColor: Colors.green,
+            );
+            ScaffoldMessenger.of(context).showSnackBar(updateSnackBar);
+
+            setState(() {
+              getInfo();
+              accountNameController.clear();
+              accountBsbController.clear();
+              accountNumberController.clear();
+            });
+          } catch (e) {
+            print(e);
+          }
         }
       },
-      child: Text("Update"),
+      child: Text(
+        "Update",
+        style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getInfo();
+  }
+
+  void getInfo() async {
+    final details = await _firestore.doc('accountDetails').get();
+
+    // print(details.data()!['name']);
+    // print(details.data()!['bsb']);
+    // print(details.data()!['number']);
+    setState(() {
+      currentAccountName = details.data()!['name'];
+      currentAccountBsb = details.data()!['bsb'];
+      currentAccountNumber = details.data()!['number'];
+    });
+  }
+
+  Widget buildCurrentInfo() {
+    return FutureBuilder(
+        future: _firestore.doc('accountDetails').get(),
+        builder: ((context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator();
+          }
+          if (snapshot.connectionState == ConnectionState.done) {
+            return Column(
+              children: [
+                showAccountName(),
+                showAccountBsb(),
+                showAccountNumber(),
+              ],
+            );
+          }
+          if (snapshot.hasError) {
+            return Text(('Error!'));
+          }
+          return Scaffold(
+            body: Center(
+              child: Text(
+                'loading...',
+                style: TextStyle(color: Colors.green),
+              ),
+            ),
+          );
+        }));
+  }
+
+  Widget showAccountName() {
+    return Card(
+      child: Text("Current Name: ${currentAccountName}"),
+    );
+  }
+
+  Widget showAccountBsb() {
+    return Card(
+      child: Text("Current BSB: ${currentAccountBsb}"),
+    );
+  }
+
+  Widget showAccountNumber() {
+    return Card(
+      child: Text("Current Number: ${currentAccountNumber}"),
     );
   }
 
@@ -144,6 +237,7 @@ class _BankDetailsState extends State<BankDetails> {
               buildBSB(),
               buildAccountNumber(),
               buildUpdateButton(),
+              buildCurrentInfo(),
             ],
           ),
         )),

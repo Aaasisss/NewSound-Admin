@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:newsound_admin/Screens/Add_Events/add_events.dart';
-import 'package:newsound_admin/Screens/Bank_Details/bank_details.dart';
-import 'package:newsound_admin/Screens/Links/links.dart';
 import 'package:newsound_admin/Screens/Login/login_page.dart';
-import 'package:newsound_admin/Screens/Settings/settings.dart';
-import 'package:newsound_admin/Screens/View_Events/view_events.dart';
 import 'package:newsound_admin/Services/auth.dart';
 import 'package:newsound_admin/Shared/Routes/approute.dart';
 import 'Screens/Home/home_page.dart';
@@ -94,13 +89,27 @@ class _MainPageState extends State<MainPage> {
       stream: AuthServive().userStream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Text("Loading");
+          return const Scaffold(
+            body: Center(
+              child: Text(
+                'loading...',
+                style: TextStyle(color: Colors.green),
+              ),
+            ),
+          );
         } else if (snapshot.hasError) {
-          return Text("error occured!");
+          return const Scaffold(
+            body: Center(
+              child: Text(
+                'error!',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          );
         } else if (snapshot.hasData) {
-          return HomePage();
+          return const HomePage();
         } else {
-          return LoginPage();
+          return const LoginPage();
         }
       },
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:newsound_admin/Screens/Add_Events/add_events.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Links extends StatefulWidget {
   const Links({Key? key}) : super(key: key);
@@ -10,11 +11,19 @@ class Links extends StatefulWidget {
 
 class _LinksState extends State<Links> {
   final formKey = GlobalKey<FormState>();
+  final facebookController = TextEditingController();
+  final instagramController = TextEditingController();
+  final youtubeController = TextEditingController();
+  String currentFacebook = '';
+  String currentInstagram = '';
+  String currentYoutube = '';
+  final _firestore = FirebaseFirestore.instance.collection('socialLink');
 
   Widget buildFacebook() {
     return Column(
       children: [
         TextFormField(
+          controller: facebookController,
           minLines: 1,
           maxLines: null,
           decoration: InputDecoration(
@@ -45,6 +54,7 @@ class _LinksState extends State<Links> {
     return Column(
       children: [
         TextFormField(
+          controller: instagramController,
           minLines: 1,
           maxLines: null,
           decoration: InputDecoration(
@@ -75,6 +85,7 @@ class _LinksState extends State<Links> {
     return Column(
       children: [
         TextFormField(
+          controller: youtubeController,
           minLines: 1,
           maxLines: null,
           decoration: InputDecoration(
@@ -103,7 +114,7 @@ class _LinksState extends State<Links> {
 
   Widget buildUpdateButton() {
     return ElevatedButton(
-      onPressed: () {
+      onPressed: () async {
         //Navigator.pushNamed(context, '/home');
         // Navigator.pushReplacement(
         //     context,
@@ -112,19 +123,103 @@ class _LinksState extends State<Links> {
         final isValid = formKey.currentState!.validate();
         if (isValid) {
           formKey.currentState!.save();
+          try {
+            await _firestore.doc('socialLinks').set({
+              'facebook': facebookController.text.trim(),
+              'instagram': instagramController.text.trim(),
+              'youtube': youtubeController.text.trim()
+            });
 
-          final message = "Updated";
-          final updateSnackBar = SnackBar(
-            content: Text(
-              message,
-              style: TextStyle(fontSize: 20.0),
-            ),
-            backgroundColor: Colors.green,
-          );
-          ScaffoldMessenger.of(context).showSnackBar(updateSnackBar);
+            final message = "Updated";
+            final updateSnackBar = SnackBar(
+              content: Text(
+                message,
+                style: TextStyle(fontSize: 20.0),
+              ),
+              backgroundColor: Colors.green,
+            );
+            ScaffoldMessenger.of(context).showSnackBar(updateSnackBar);
+          } catch (e) {
+            print(e);
+          }
+
+          setState(() {
+            getCurrentData();
+            facebookController.clear();
+            instagramController.clear();
+            youtubeController.clear();
+          });
         }
       },
       child: Text("Update"),
+    );
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getCurrentData();
+  }
+
+  void getCurrentData() async {
+    final details = await _firestore.doc('socialLinks').get();
+
+    // print(details.data()!['name']);
+    // print(details.data()!['bsb']);
+    // print(details.data()!['number']);
+    setState(() {
+      currentFacebook = details.data()!['facebook'];
+      currentInstagram = details.data()!['instagram'];
+      currentYoutube = details.data()!['youtube'];
+    });
+  }
+
+  Widget buildCurrentInfo() {
+    return FutureBuilder(
+        future: _firestore.doc('socialLinks').get(),
+        builder: ((context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator();
+          }
+          if (snapshot.connectionState == ConnectionState.done) {
+            return Column(
+              children: [
+                showCurrentFacebook(),
+                showCurrentInstagram(),
+                showCurrentYoutube(),
+              ],
+            );
+          }
+          if (snapshot.hasError) {
+            return Text(('Error!'));
+          }
+          return Scaffold(
+            body: Center(
+              child: Text(
+                'loading...',
+                style: TextStyle(color: Colors.green),
+              ),
+            ),
+          );
+        }));
+  }
+
+  Widget showCurrentFacebook() {
+    return Card(
+      child: Text("Current Phone: ${currentFacebook}"),
+    );
+  }
+
+  Widget showCurrentInstagram() {
+    return Card(
+      child: Text("Current Email: ${currentInstagram}"),
+    );
+  }
+
+  Widget showCurrentYoutube() {
+    return Card(
+      child: Text("Current Address: ${currentYoutube}"),
     );
   }
 
@@ -143,6 +238,7 @@ class _LinksState extends State<Links> {
               buildInstagram(),
               buildYouTube(),
               buildUpdateButton(),
+              buildCurrentInfo(),
             ],
           ),
         )),
