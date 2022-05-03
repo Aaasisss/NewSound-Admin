@@ -136,6 +136,7 @@ class _BankDetailsState extends State<BankDetails> {
             );
             ScaffoldMessenger.of(context).showSnackBar(updateSnackBar);
 
+            //clear the fields
             setState(() {
               getInfo();
               accountNameController.clear();

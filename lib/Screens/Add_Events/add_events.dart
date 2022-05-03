@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'dart:async';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:newsound_admin/Services/storage.dart';
+import 'package:path_provider/path_provider.dart';
 
 class AddEvents extends StatefulWidget {
   const AddEvents({Key? key}) : super(key: key);
@@ -13,7 +15,12 @@ class AddEvents extends StatefulWidget {
 }
 
 class _AddEventsState extends State<AddEvents> {
+  final _firestore = FirebaseFirestore.instance.collection('events');
+  final StorageService storage = StorageService();
   final formKey = GlobalKey<FormState>();
+  final titleController = TextEditingController();
+  final descriptionController = TextEditingController();
+  final venueController = TextEditingController();
   String newEventTitle = '';
   String newEventDescription = '';
   String newEventVenue = '';
@@ -25,6 +32,7 @@ class _AddEventsState extends State<AddEvents> {
     return Column(
       children: [
         TextFormField(
+          controller: titleController,
           minLines: 1,
           maxLines: null,
           decoration: InputDecoration(
@@ -55,6 +63,7 @@ class _AddEventsState extends State<AddEvents> {
     return Column(
       children: [
         TextFormField(
+          controller: descriptionController,
           minLines: 2,
           maxLines: null,
           decoration: InputDecoration(
@@ -85,6 +94,7 @@ class _AddEventsState extends State<AddEvents> {
     return Column(
       children: [
         TextFormField(
+          controller: venueController,
           decoration: InputDecoration(
             labelText: "Venue",
             labelStyle:
@@ -111,8 +121,10 @@ class _AddEventsState extends State<AddEvents> {
 
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
+  String selectedDateToString = '';
+  String selectedTimeToString = '';
 
-  Future pickDate(BuildContext context) async {
+  void pickDate(BuildContext context) async {
     final initialDate = DateTime.now();
     final newDate = await showDatePicker(
       context: context,
@@ -124,10 +136,11 @@ class _AddEventsState extends State<AddEvents> {
     if (newDate == null) return null;
     setState(() {
       selectedDate = newDate;
+      //print(selectedDateToString);
     });
   }
 
-  Future pickTime(BuildContext context) async {
+  void pickTime(BuildContext context) async {
     final initialTime = TimeOfDay(hour: 9, minute: 0);
     final newTime = await showTimePicker(
       context: context,
@@ -143,9 +156,9 @@ class _AddEventsState extends State<AddEvents> {
     if (selectedDate == null) {
       return "Select Date";
     } else {
-      return DateFormat('MM/dd/yyyy').format(selectedDate!);
+      selectedDateToString = DateFormat('dd/mm/yyyy').format(selectedDate!);
+      return selectedDateToString;
       //return "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}";
-
     }
   }
 
@@ -155,7 +168,8 @@ class _AddEventsState extends State<AddEvents> {
     } else {
       final hours = selectedTime!.hour.toString().padLeft(2, '0');
       final minutes = selectedTime!.minute.toString().padLeft(2, '0');
-      return "${hours}:${minutes}";
+      selectedTimeToString = "${hours}:${minutes}";
+      return selectedTimeToString;
     }
   }
 
@@ -211,7 +225,7 @@ class _AddEventsState extends State<AddEvents> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          Text(
+          const Text(
             'TimeZone',
             style: TextStyle(fontWeight: FontWeight.w500),
           ),
@@ -226,138 +240,155 @@ class _AddEventsState extends State<AddEvents> {
     );
   }
 
-  Widget buildSelectPicture() {
+  //the image file that will be selected by the use, which is initially set to null
+  File? _image;
+  String? _imagePath;
+  String? _imageName;
+
+  Widget buildSelectPhoto() {
     return Column(
       children: [
         Row(
           children: [
             OutlinedButton(
-              onPressed: _optionsDialogueBox,
+              onPressed: () async {
+                final result = await FilePicker.platform.pickFiles(
+                  allowMultiple: false,
+                  type: FileType.custom,
+                  allowedExtensions: ['png', 'jpg', 'jpeg'],
+                );
+                if (result == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('No file selected'),
+                  ));
+                  return;
+                }
+                //final appDocDir = await getApplicationDocumentsDirectory();
+
+                final path = result.files.single.path;
+                final fileName = result.files.single.name;
+
+                //final filePath = "${appDocDir.absolute}/$fileName";
+                setState(() {
+                  _image = File(path!);
+                  _imagePath = path;
+                  _imageName = fileName;
+                });
+                print("path is: ${path}");
+                print("filename is: ${fileName}");
+              },
               child: Text("Select Photo"),
             ),
-            SizedBox(
+            const SizedBox(
               width: 10.0,
             ),
-            Container(
-              child: _image == null
-                  ? Text("No file chosen")
-                  : Image.file(
-                      _image!,
-                      height: 150,
-                      width: 150,
-                    ),
+            Flexible(
+              child: Column(
+                children: [
+                  _image == null
+                      ? Text("No file chosen")
+                      : Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Image.file(
+                              _image!,
+                              height: 150,
+                              width: 150,
+                            ),
+                            Text(
+                              (_imageName!),
+                              style: TextStyle(overflow: TextOverflow.visible),
+                            ),
+                          ],
+                        )
+                ],
+              ),
             ),
           ],
         ),
-        SizedBox(height: 10.0)
+        const SizedBox(height: 10.0)
       ],
     );
   }
 
-  //the image file that will be selected by the use, which is initially set to null
-  File? _image = null;
-  //create an instance of image_picker
-  final ImagePicker _picker = ImagePicker();
-
-  Future<void> _optionsDialogueBox() {
-    return showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            backgroundColor: Colors.blue,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-            content: SingleChildScrollView(
-              child: ListBody(children: <Widget>[
-                GestureDetector(
-                  child: Text(
-                    "Take a Picture",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20.0,
-                    ),
-                  ),
-                  onTap: openCamera,
-                ),
-                Padding(
-                  padding: EdgeInsets.all(10.0),
-                ),
-                GestureDetector(
-                  child: Text(
-                    "Select Image From gallery",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20.0,
-                    ),
-                  ),
-                  onTap: openGallery,
-                )
-              ]),
-            ),
-          );
-        });
-  }
-
-  Future openCamera() async {
-    try {
-      var imageFromCamera = await _picker.pickImage(source: ImageSource.camera);
-      if (imageFromCamera == null) return;
-      setState(() {
-        _image = File(imageFromCamera.path);
-        //widget.file = File(imageFromCamera!.path);
-      });
-    } on PlatformException catch (e) {
-      print("Failed to pick Image: $e");
-    }
-    Navigator.of(context).pop();
-  }
-
-  Future openGallery() async {
-    try {
-      var imageFromGallery =
-          await _picker.pickImage(source: ImageSource.gallery);
-      if (imageFromGallery == null) return;
-
-      setState(() {
-        _image = File(imageFromGallery.path);
-        //widget.file = File(imageFromGallery!.path);
-      });
-    } on PlatformException catch (e) {
-      print("Failed to pick Image: $e");
-    }
-    Navigator.of(context).pop();
-  }
-
   Widget buildUpdateButton() {
     return ElevatedButton(
-      onPressed: () {
-        //Navigator.pushNamed(context, '/home');
-        // Navigator.pushReplacement(
-        //     context,
-        //     MaterialPageRoute(
-        //         builder: (context) => HomePage()));
+      onPressed: () async {
+        //validates the form
         final isValid = formKey.currentState!.validate();
+
         if (isValid) {
-          formKey.currentState!.save();
+          if (selectedDate != null &&
+              selectedTime != null &&
+              selectedTimeZone != null &&
+              _image != null) {
+            //if it is valid, current state is saved
+            formKey.currentState!.save();
 
-          final message = "Updated";
-          final updateSnackBar = SnackBar(
-            content: Text(
-              message,
-              style: TextStyle(fontSize: 20.0),
-            ),
-            backgroundColor: Colors.green,
-          );
-          ScaffoldMessenger.of(context).showSnackBar(updateSnackBar);
+            //try to upload the image first
+            try {
+              await storage.uploadFile(_image!, _imageName!);
+            } on FirebaseException catch (e) {
+              print(e);
+            }
+
+            //get the Url of the uploaded image
+            String downloadUrl = await storage.getDownloadUrl(_imageName!);
+
+            //if download url exists then upload the form data to firestore
+            if (!downloadUrl.isEmpty) {
+              try {
+                await _firestore.add({
+                  'title': titleController.text,
+                  'description': descriptionController.text,
+                  'venue': venueController.text,
+                  'date': selectedDateToString,
+                  'time': selectedTimeToString,
+                  'timeZone': selectedTimeZone,
+                  'photoUrl': downloadUrl,
+                });
+
+                //reset form fields
+                setState(() {
+                  titleController.clear();
+                  descriptionController.clear();
+                  venueController.clear();
+                  selectedDate = null;
+                  selectedTime = null;
+                  selectedTimeZone = null;
+                  _image = null;
+                });
+
+                final message = "Updated";
+                final updateSnackBar = SnackBar(
+                  content: Text(
+                    message,
+                    style: TextStyle(fontSize: 20.0),
+                  ),
+                  backgroundColor: Colors.green,
+                );
+                ScaffoldMessenger.of(context).showSnackBar(updateSnackBar);
+              } catch (e) {
+                print(e);
+              }
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text("something went wrong while uploading image")));
+              // showDialog(
+              //     context: context,
+              //     builder: (BuildContext context) =>
+              //         Text('something went wrong while uploading image'));
+            }
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Please select all the fields")));
+            // showDialog(
+            //     context: context,
+            //     builder: (BuildContext context) =>
+            //         Text('Please select all the fields'));
+          }
         }
-
-        print(newEventTitle);
-        print(newEventDescription);
-        print(newEventVenue);
-        print(selectedDate);
-        print(selectedTime);
-        print(selectedTimeZone);
       },
       child: Text("Update"),
     );
@@ -379,7 +410,7 @@ class _AddEventsState extends State<AddEvents> {
               buildVenue(),
               buildDateTime(),
               buildTimeZone(),
-              buildSelectPicture(),
+              buildSelectPhoto(),
               buildUpdateButton(),
             ],
           ),
