@@ -17,7 +17,7 @@ class _LinksState extends State<Links> {
   String currentFacebook = '';
   String currentInstagram = '';
   String currentYoutube = '';
-  final _firestore = FirebaseFirestore.instance.collection('socialLink');
+  final _firestore = FirebaseFirestore.instance.collection('socialLinks');
 
   Widget buildFacebook() {
     return Column(
@@ -207,19 +207,19 @@ class _LinksState extends State<Links> {
 
   Widget showCurrentFacebook() {
     return Card(
-      child: Text("Current Phone: ${currentFacebook}"),
+      child: Text("Current Facebook: ${currentFacebook}"),
     );
   }
 
   Widget showCurrentInstagram() {
     return Card(
-      child: Text("Current Email: ${currentInstagram}"),
+      child: Text("Current Instagram: ${currentInstagram}"),
     );
   }
 
   Widget showCurrentYoutube() {
     return Card(
-      child: Text("Current Address: ${currentYoutube}"),
+      child: Text("Current Youtube: ${currentYoutube}"),
     );
   }
 

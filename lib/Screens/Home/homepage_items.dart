@@ -22,9 +22,9 @@ class _ItemSettingsState extends State<ItemSettings> {
       onPressed: () {
         Navigator.of(context).pushNamed('/settings');
       },
-      child: ListTile(
+      child: const ListTile(
         leading: Icon(Icons.settings),
-        title: Text('Settings'),
+        title: const Text('Settings'),
       ),
     );
   }
@@ -44,9 +44,9 @@ class _ItemViewEventsState extends State<ItemViewEvents> {
       onPressed: () {
         Navigator.of(context).pushNamed('/view_events');
       },
-      child: ListTile(
-        leading: Icon(Icons.remove_red_eye),
-        title: Text('View Events'),
+      child: const ListTile(
+        leading: const Icon(Icons.remove_red_eye),
+        title: const Text('View Events'),
       ),
     );
   }
@@ -66,7 +66,7 @@ class _ItemAddEventsState extends State<ItemAddEvents> {
       onPressed: () {
         Navigator.of(context).pushNamed('/add_events');
       },
-      child: ListTile(
+      child: const ListTile(
         leading: Icon(Icons.add),
         title: Text('Add Events'),
       ),
@@ -88,9 +88,9 @@ class _ItemLinksState extends State<ItemLinks> {
       onPressed: () {
         Navigator.of(context).pushNamed('/links');
       },
-      child: ListTile(
+      child: const ListTile(
         leading: Icon(Icons.link),
-        title: Text('Links'),
+        title: Text('Social Links'),
       ),
     );
   }
@@ -110,7 +110,7 @@ class _ItemBankDetailsState extends State<ItemBankDetails> {
       onPressed: () {
         Navigator.of(context).pushNamed('/bank_details');
       },
-      child: ListTile(
+      child: const ListTile(
         leading: Icon(Icons.money),
         title: Text('Bank Details'),
       ),

@@ -1,5 +1,10 @@
+import 'dart:math';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:newsound_admin/Models/event_model.dart';
 import 'package:newsound_admin/Screens/View_Events/edit_event.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ViewEvents extends StatefulWidget {
   const ViewEvents({Key? key}) : super(key: key);
@@ -9,7 +14,9 @@ class ViewEvents extends StatefulWidget {
 }
 
 class _ViewEventsState extends State<ViewEvents> {
-  Widget buildEventTile() {
+  final _firestore = FirebaseFirestore.instance.collection('events');
+
+  Widget buildEventTile(Event event, String eventId) {
     return Container(
       margin: EdgeInsets.only(bottom: 10.0),
       decoration: BoxDecoration(
@@ -25,10 +32,10 @@ class _ViewEventsState extends State<ViewEvents> {
               children: <Widget>[
                 InkWell(
                   child: Hero(
-                    tag: AssetImage("lib/Images/pasters.png"),
+                    tag: event.photoUrl,
                     child: Image(
-                      image: AssetImage(
-                        "lib/Images/pasters.png",
+                      image: NetworkImage(
+                        event.photoUrl,
                       ),
                       height: 100,
                       width: 100,
@@ -36,8 +43,15 @@ class _ViewEventsState extends State<ViewEvents> {
                     ),
                   ),
                   onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => EditEvent()));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => EditEvent(
+                          event: event,
+                          eventId: eventId,
+                        ),
+                      ),
+                    );
                   },
                 ),
                 SizedBox(width: 10.0),
@@ -47,14 +61,14 @@ class _ViewEventsState extends State<ViewEvents> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Event Title this is the title it is so long Event Title this is the title it is so long",
+                        "${event.title}",
                         style: TextStyle(
                             fontSize: 20.0, fontWeight: FontWeight.bold),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        "Event date, time s the title it is so long Event Title this is t",
+                        "${event.date}, ${event.time}: ${event.timeZone} time",
                         style: TextStyle(fontSize: 15.0),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -69,11 +83,71 @@ class _ViewEventsState extends State<ViewEvents> {
               children: [
                 IconButton(
                     onPressed: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => EditEvent()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => EditEvent(
+                                    event: event,
+                                    eventId: eventId,
+                                  )));
                     },
-                    icon: Icon(Icons.edit)),
-                IconButton(onPressed: () {}, icon: Icon(Icons.delete)),
+                    icon: const Icon(Icons.edit)),
+                IconButton(
+                    onPressed: () async {
+                      showDialog(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                                title: Text(
+                                  "Warning!",
+                                  style: TextStyle(color: Colors.redAccent),
+                                ),
+                                content:
+                                    Text("Do you want to delete this event?"),
+                                elevation: 24.0,
+                                actions: [
+                                  TextButton(
+                                    onPressed: () async {
+                                      try {
+                                        await _firestore
+                                            .doc(eventId)
+                                            .delete()
+                                            .then((_) {
+                                          Navigator.pop(context);
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(const SnackBar(
+                                            content: Text(
+                                              "Event deleted successfully.",
+                                              style: TextStyle(fontSize: 20.0),
+                                            ),
+                                            backgroundColor: Colors.green,
+                                          ));
+                                        });
+                                      } on FirebaseException catch (e) {
+                                        print(e);
+                                        Navigator.pop(context);
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(const SnackBar(
+                                          content: Text(
+                                            "Error occured!",
+                                            style: TextStyle(fontSize: 20.0),
+                                          ),
+                                          backgroundColor: Colors.redAccent,
+                                        ));
+                                      }
+                                    },
+                                    child: Text("Yes"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () async {
+                                      Navigator.pop(context);
+                                    },
+                                    child: Text("No"),
+                                  ),
+                                ],
+                              ),
+                          barrierDismissible: true);
+                    },
+                    icon: const Icon(Icons.delete)),
               ],
             ),
           ),
@@ -85,25 +159,39 @@ class _ViewEventsState extends State<ViewEvents> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('View Events')),
-      body: Container(
-        padding: EdgeInsets.all(10.0),
-        child: SingleChildScrollView(
-            child: Form(
-          child: Column(
-            children: <Widget>[
-              buildEventTile(),
-              buildEventTile(),
-              buildEventTile(),
-              buildEventTile(),
-              buildEventTile(),
-              buildEventTile(),
-              buildEventTile(),
-              buildEventTile(),
-              buildEventTile(),
-            ],
-          ),
-        )),
+      appBar: AppBar(title: const Text('View Events')),
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: _firestore.snapshots(),
+        builder: (context, asyncSnapshot) {
+          List<Widget> eventWidgetsList = [];
+          if (asyncSnapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          } else if (asyncSnapshot.hasData) {
+            final events = asyncSnapshot.data!.docs;
+
+            for (var event in events) {
+              final data = event.data();
+              String eventId = event.id;
+
+              final eventInstance = Event.fromJson(data);
+              eventWidgetsList.add(buildEventTile(eventInstance, eventId));
+            }
+            //print(eventsMapWithId);
+
+            return ListView(
+              children: eventWidgetsList,
+            );
+          } else if (asyncSnapshot.hasError) {
+            return const Text(
+              "Problem loading data!",
+              style: TextStyle(color: Colors.red),
+            );
+          } else {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
       ),
     );
   }

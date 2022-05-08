@@ -156,7 +156,7 @@ class _AddEventsState extends State<AddEvents> {
     if (selectedDate == null) {
       return "Select Date";
     } else {
-      selectedDateToString = DateFormat('dd/mm/yyyy').format(selectedDate!);
+      selectedDateToString = DateFormat('dd/MM/yyyy').format(selectedDate!);
       return selectedDateToString;
       //return "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}";
     }
@@ -326,60 +326,94 @@ class _AddEventsState extends State<AddEvents> {
             //if it is valid, current state is saved
             formKey.currentState!.save();
 
-            //try to upload the image first
             try {
-              await storage.uploadFile(_image!, _imageName!);
-            } on FirebaseException catch (e) {
-              print(e);
-            }
+              await _firestore.add({
+                'title': titleController.text,
+                'description': descriptionController.text,
+                'venue': venueController.text,
+                'date': selectedDateToString,
+                'time': selectedTimeToString,
+                'timeZone': selectedTimeZone,
+                'photoUrl': '',
+              }).then((value) async {
+                final message = "Event added";
 
-            //get the Url of the uploaded image
-            String downloadUrl = await storage.getDownloadUrl(_imageName!);
-
-            //if download url exists then upload the form data to firestore
-            if (!downloadUrl.isEmpty) {
-              try {
-                await _firestore.add({
-                  'title': titleController.text,
-                  'description': descriptionController.text,
-                  'venue': venueController.text,
-                  'date': selectedDateToString,
-                  'time': selectedTimeToString,
-                  'timeZone': selectedTimeZone,
-                  'photoUrl': downloadUrl,
-                });
-
-                //reset form fields
-                setState(() {
-                  titleController.clear();
-                  descriptionController.clear();
-                  venueController.clear();
-                  selectedDate = null;
-                  selectedTime = null;
-                  selectedTimeZone = null;
-                  _image = null;
-                });
-
-                final message = "Updated";
-                final updateSnackBar = SnackBar(
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text(
                     message,
                     style: TextStyle(fontSize: 20.0),
                   ),
                   backgroundColor: Colors.green,
-                );
-                ScaffoldMessenger.of(context).showSnackBar(updateSnackBar);
-              } catch (e) {
-                print(e);
-              }
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text("something went wrong while uploading image")));
-              // showDialog(
-              //     context: context,
-              //     builder: (BuildContext context) =>
-              //         Text('something went wrong while uploading image'));
+                ));
+                String eventAndImageIdGeneratedByFirebase = value.id;
+                print("document id is: ${eventAndImageIdGeneratedByFirebase}");
+                //try to upload the image first
+                try {
+                  await storage
+                      .uploadFile(_image!, eventAndImageIdGeneratedByFirebase)
+                      .then((_) async {
+                    //get the Url of the uploaded image
+                    String downloadUrl = await storage
+                        .getDownloadUrl(eventAndImageIdGeneratedByFirebase);
+                    print("download url is: ${downloadUrl}");
+                    final message = "Image uploaded";
+
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(
+                        message,
+                        style: TextStyle(fontSize: 20.0),
+                      ),
+                      backgroundColor: Colors.green,
+                    ));
+
+                    if (downloadUrl.isNotEmpty) {
+                      try {
+                        await _firestore
+                            .doc(eventAndImageIdGeneratedByFirebase)
+                            .set({
+                          'photoUrl': downloadUrl,
+                        }, SetOptions(merge: true)).then((_) {
+                          final message = "Updated";
+
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(
+                              message,
+                              style: TextStyle(fontSize: 20.0),
+                            ),
+                            backgroundColor: Colors.green,
+                          ));
+                        });
+                      } on FirebaseException catch (e) {
+                        print(e);
+                      }
+                    }
+                  });
+                } on FirebaseException catch (e) {
+                  print(e);
+                }
+              });
+
+              //reset form fields
+              setState(() {
+                titleController.clear();
+                descriptionController.clear();
+                venueController.clear();
+                selectedDate = null;
+                selectedTime = null;
+                selectedTimeZone = null;
+                _image = null;
+              });
+            } catch (e) {
+              print(e);
             }
+
+            // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            //     content: Text("something went wrong while uploading image")));
+            // showDialog(
+            //     context: context,
+            //     builder: (BuildContext context) =>
+            //         Text('something went wrong while uploading image'));
+
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text("Please select all the fields")));
