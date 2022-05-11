@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:newsound_admin/Models/event_model.dart';
 import 'package:newsound_admin/Services/storage.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -326,28 +327,44 @@ class _AddEventsState extends State<AddEvents> {
             //if it is valid, current state is saved
             formKey.currentState!.save();
 
-            try {
-              await _firestore.add({
-                'title': titleController.text,
-                'description': descriptionController.text,
-                'venue': venueController.text,
-                'date': selectedDateToString,
-                'time': selectedTimeToString,
-                'timeZone': selectedTimeZone,
-                'photoUrl': '',
-              }).then((value) async {
-                final message = "Event added";
+            //create an event object to upload to database. we do it to ensure
+            //that we upload the similar object to the database every time.
+            Event eventToUpload = Event(
+              title: titleController.text,
+              description: descriptionController.text,
+              venue: venueController.text,
+              date: selectedDateToString,
+              time: selectedTimeToString,
+              timeZone: selectedTimeZone!,
+              photoUrl: "",
+              serverTimeStamp: FieldValue.serverTimestamp(),
+            );
 
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            //when button pressed, 3 operations take place
+            //1. it first uploads the event object to the databse
+            //and then it grabs the id of the uploaded document
+            //2. then it uploads the image file to the firebase storage
+            //with the same id, in this way, both the document and the
+            // image file are synchronised
+            //3. now it grabs the download url of the uploaded image file
+            //and updates the photoUrl field of the uploaded document
+
+            try {
+              //this uploads the event object to the databse
+              await _firestore.add(eventToUpload.toJson()).then((value) async {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                   content: Text(
-                    message,
+                    "event added",
                     style: TextStyle(fontSize: 20.0),
                   ),
                   backgroundColor: Colors.green,
                 ));
+
+                //it grabs the id of the uploaded document
                 String eventAndImageIdGeneratedByFirebase = value.id;
-                print("document id is: ${eventAndImageIdGeneratedByFirebase}");
-                //try to upload the image first
+
+                //it uploads the image file to the firebase storage
+                //with the same id
                 try {
                   await storage
                       .uploadFile(_image!, eventAndImageIdGeneratedByFirebase)
@@ -356,11 +373,10 @@ class _AddEventsState extends State<AddEvents> {
                     String downloadUrl = await storage
                         .getDownloadUrl(eventAndImageIdGeneratedByFirebase);
                     print("download url is: ${downloadUrl}");
-                    final message = "Image uploaded";
 
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                       content: Text(
-                        message,
+                        "Image uploaded",
                         style: TextStyle(fontSize: 20.0),
                       ),
                       backgroundColor: Colors.green,
@@ -368,28 +384,43 @@ class _AddEventsState extends State<AddEvents> {
 
                     if (downloadUrl.isNotEmpty) {
                       try {
+                        //it updates the photoUrl field of the uploaded document
                         await _firestore
                             .doc(eventAndImageIdGeneratedByFirebase)
                             .set({
                           'photoUrl': downloadUrl,
                         }, SetOptions(merge: true)).then((_) {
-                          final message = "Updated";
-
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
                             content: Text(
-                              message,
+                              "Successfull!",
                               style: TextStyle(fontSize: 20.0),
                             ),
                             backgroundColor: Colors.green,
                           ));
                         });
                       } on FirebaseException catch (e) {
-                        print(e);
+                        //print(e);
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                          content: Text(
+                            "Error synchronizing event and image",
+                            style: TextStyle(fontSize: 20.0),
+                          ),
+                          backgroundColor: Colors.red,
+                        ));
                       }
                     }
                   });
                 } on FirebaseException catch (e) {
-                  print(e);
+                  //print(e);
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text(
+                      "Error adding image",
+                      style: TextStyle(fontSize: 20.0),
+                    ),
+                    backgroundColor: Colors.red,
+                  ));
                 }
               });
 
@@ -404,7 +435,14 @@ class _AddEventsState extends State<AddEvents> {
                 _image = null;
               });
             } catch (e) {
-              print(e);
+              //print(e);
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text(
+                  "Error adding event",
+                  style: TextStyle(fontSize: 20.0),
+                ),
+                backgroundColor: Colors.red,
+              ));
             }
 
             // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -416,7 +454,7 @@ class _AddEventsState extends State<AddEvents> {
 
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Please select all the fields")));
+                const SnackBar(content: Text("Please select all the fields")));
             // showDialog(
             //     context: context,
             //     builder: (BuildContext context) =>
@@ -424,14 +462,14 @@ class _AddEventsState extends State<AddEvents> {
           }
         }
       },
-      child: Text("Update"),
+      child: Text("ADD EVENT"),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Add Events')),
+      appBar: AppBar(title: const Text('Add Events')),
       body: Container(
         padding: EdgeInsets.all(10.0),
         child: SingleChildScrollView(

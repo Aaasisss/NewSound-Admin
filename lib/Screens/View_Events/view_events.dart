@@ -1,10 +1,7 @@
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:newsound_admin/Models/event_model.dart';
 import 'package:newsound_admin/Screens/View_Events/edit_event.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ViewEvents extends StatefulWidget {
   const ViewEvents({Key? key}) : super(key: key);
@@ -18,7 +15,7 @@ class _ViewEventsState extends State<ViewEvents> {
 
   Widget buildEventTile(Event event, String eventId) {
     return Container(
-      margin: EdgeInsets.only(bottom: 10.0),
+      margin: const EdgeInsets.only(bottom: 10.0),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10.0),
           color: Colors.amber,
@@ -54,7 +51,7 @@ class _ViewEventsState extends State<ViewEvents> {
                     );
                   },
                 ),
-                SizedBox(width: 10.0),
+                const SizedBox(width: 10.0),
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -62,14 +59,14 @@ class _ViewEventsState extends State<ViewEvents> {
                     children: [
                       Text(
                         "${event.title}",
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontSize: 20.0, fontWeight: FontWeight.bold),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         "${event.date}, ${event.time}: ${event.timeZone} time",
-                        style: TextStyle(fontSize: 15.0),
+                        style: const TextStyle(fontSize: 15.0),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
@@ -97,15 +94,15 @@ class _ViewEventsState extends State<ViewEvents> {
                       showDialog(
                           context: context,
                           builder: (_) => AlertDialog(
-                                title: Text(
+                                title: const Text(
                                   "Warning!",
                                   style: TextStyle(color: Colors.redAccent),
                                 ),
-                                content:
-                                    Text("Do you want to delete this event?"),
+                                content: const Text(
+                                    "Do you want to delete this event?"),
                                 elevation: 24.0,
                                 actions: [
-                                  TextButton(
+                                  OutlinedButton(
                                     onPressed: () async {
                                       try {
                                         await _firestore
@@ -122,8 +119,8 @@ class _ViewEventsState extends State<ViewEvents> {
                                             backgroundColor: Colors.green,
                                           ));
                                         });
-                                      } on FirebaseException catch (e) {
-                                        print(e);
+                                      } on FirebaseException {
+                                        //print(e);
                                         Navigator.pop(context);
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(const SnackBar(
@@ -135,13 +132,13 @@ class _ViewEventsState extends State<ViewEvents> {
                                         ));
                                       }
                                     },
-                                    child: Text("Yes"),
+                                    child: const Text("YES"),
                                   ),
-                                  TextButton(
+                                  OutlinedButton(
                                     onPressed: () async {
                                       Navigator.pop(context);
                                     },
-                                    child: Text("No"),
+                                    child: const Text("NO"),
                                   ),
                                 ],
                               ),
@@ -161,24 +158,32 @@ class _ViewEventsState extends State<ViewEvents> {
     return Scaffold(
       appBar: AppBar(title: const Text('View Events')),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: _firestore.snapshots(),
+        stream:
+            _firestore.orderBy("serverTimeStamp", descending: true).snapshots(),
+        //it creates a stream of documents in the decreasing order of serverTimeStamp field of the document
         builder: (context, asyncSnapshot) {
+          //list of the actual widgets shown on the screen
           List<Widget> eventWidgetsList = [];
           if (asyncSnapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
+            return const Center(child: CircularProgressIndicator());
           } else if (asyncSnapshot.hasData) {
+            //list of querysnapshots
             final events = asyncSnapshot.data!.docs;
 
             for (var event in events) {
+              //document
               final data = event.data();
               String eventId = event.id;
 
+              //create event object from the document
               final eventInstance = Event.fromJson(data);
+
               eventWidgetsList.add(buildEventTile(eventInstance, eventId));
             }
             //print(eventsMapWithId);
 
             return ListView(
+              padding: const EdgeInsets.fromLTRB(5, 10, 5, 0),
               children: eventWidgetsList,
             );
           } else if (asyncSnapshot.hasError) {

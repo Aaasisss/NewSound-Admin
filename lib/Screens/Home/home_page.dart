@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:newsound_admin/Screens/Home/homepage_items.dart';
 import 'package:newsound_admin/Services/auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -17,14 +16,14 @@ class _HomePageState extends State<HomePage> {
     var user = FirebaseAuth.instance.currentUser;
     return Scaffold(
       appBar: AppBar(
-        title: Center(
+        title: const Center(
           child: Text('New Sound Admin'),
         ),
       ),
       body: Container(
         height: double.infinity,
         width: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
             gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -34,7 +33,7 @@ class _HomePageState extends State<HomePage> {
               Color(0xcc5ac18e),
               Color(0xff5ac18e),
             ])),
-        padding: EdgeInsets.all(50.0),
+        padding: const EdgeInsets.all(50.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -43,7 +42,7 @@ class _HomePageState extends State<HomePage> {
                   itemCount: homepageItemList.length,
                   itemBuilder: (BuildContext context, int index) {
                     return Container(
-                      margin: EdgeInsets.all(10.0),
+                      margin: const EdgeInsets.all(10.0),
                       child: homepageItemList[index],
                     );
                   }),
@@ -51,7 +50,7 @@ class _HomePageState extends State<HomePage> {
             Text("Signed in as ${user!.displayName}"),
             ElevatedButton(
               onPressed: AuthServive().signOut,
-              child: Text("Sign Out"),
+              child: const Text("Sign Out"),
             ),
           ],
         ),

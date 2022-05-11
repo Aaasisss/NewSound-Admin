@@ -29,8 +29,8 @@ class _SettingsState extends State<Settings> {
           maxLines: null,
           decoration: InputDecoration(
             labelText: "Phone",
-            labelStyle:
-                TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+            labelStyle: const TextStyle(
+                color: Colors.black, fontWeight: FontWeight.w500),
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
           ),
@@ -44,7 +44,7 @@ class _SettingsState extends State<Settings> {
             return null;
           },
         ),
-        SizedBox(
+        const SizedBox(
           height: 10.0,
         )
       ],
@@ -60,8 +60,8 @@ class _SettingsState extends State<Settings> {
           maxLines: null,
           decoration: InputDecoration(
             labelText: "Address",
-            labelStyle:
-                TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+            labelStyle: const TextStyle(
+                color: Colors.black, fontWeight: FontWeight.w500),
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
           ),
@@ -75,7 +75,7 @@ class _SettingsState extends State<Settings> {
             return null;
           },
         ),
-        SizedBox(
+        const SizedBox(
           height: 10.0,
         )
       ],
@@ -91,8 +91,8 @@ class _SettingsState extends State<Settings> {
           maxLines: null,
           decoration: InputDecoration(
             labelText: "Email",
-            labelStyle:
-                TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+            labelStyle: const TextStyle(
+                color: Colors.black, fontWeight: FontWeight.w500),
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
           ),
@@ -106,38 +106,7 @@ class _SettingsState extends State<Settings> {
             return null;
           },
         ),
-        SizedBox(
-          height: 10.0,
-        )
-      ],
-    );
-  }
-
-  Widget buildMap() {
-    return Column(
-      children: [
-        TextFormField(
-          controller: mapsController,
-          minLines: 1,
-          maxLines: null,
-          decoration: InputDecoration(
-            labelText: "Map",
-            labelStyle:
-                TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
-            border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
-          ),
-          onSaved: (value) => setState(() {
-            //newEventTitle = value!;
-          }),
-          validator: (value) {
-            if (value!.isEmpty) {
-              return "Please put location detail";
-            }
-            return null;
-          },
-        ),
-        SizedBox(
+        const SizedBox(
           height: 10.0,
         )
       ],
@@ -157,15 +126,15 @@ class _SettingsState extends State<Settings> {
               'phone': phoneController.text.trim(),
             });
 
-            final message = "Updated";
-            final updateSnackBar = SnackBar(
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text(
-                message,
+                "Updated",
                 style: TextStyle(fontSize: 20.0),
               ),
               backgroundColor: Colors.green,
-            );
-            ScaffoldMessenger.of(context).showSnackBar(updateSnackBar);
+            ));
+
+            //clear input fields
             setState(() {
               getCurrentData();
               phoneController.clear();
@@ -173,11 +142,18 @@ class _SettingsState extends State<Settings> {
               addressController.clear();
             });
           } catch (e) {
-            print(e);
+            //print(e);
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text(
+                "Error occured",
+                style: TextStyle(fontSize: 20.0),
+              ),
+              backgroundColor: Colors.green,
+            ));
           }
         }
       },
-      child: Text("Update"),
+      child: const Text("UPDATE"),
     );
   }
 
@@ -206,7 +182,7 @@ class _SettingsState extends State<Settings> {
         future: _firestore.doc('accountDetails').get(),
         builder: ((context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
+            return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.connectionState == ConnectionState.done) {
             return Column(
@@ -218,9 +194,9 @@ class _SettingsState extends State<Settings> {
             );
           }
           if (snapshot.hasError) {
-            return Text(('Error!'));
+            return const Text(('Error!'));
           }
-          return Scaffold(
+          return const Scaffold(
             body: Center(
               child: Text(
                 'loading...',
@@ -252,9 +228,9 @@ class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Settings')),
+      appBar: AppBar(title: const Text('Settings')),
       body: Container(
-        padding: EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(10.0),
         child: SingleChildScrollView(
             child: Form(
           key: formKey,
@@ -263,7 +239,6 @@ class _SettingsState extends State<Settings> {
               buildPhone(),
               buildAddress(),
               buildEmail(),
-              buildMap(),
               buildUpdateButton(),
               buildCurrentInfo(),
             ],

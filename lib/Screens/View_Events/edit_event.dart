@@ -48,8 +48,8 @@ class _EditEventState extends State<EditEvent> {
           maxLines: null,
           decoration: InputDecoration(
             labelText: "Title",
-            labelStyle:
-                TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+            labelStyle: const TextStyle(
+                color: Colors.black, fontWeight: FontWeight.w500),
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
           ),
@@ -60,7 +60,7 @@ class _EditEventState extends State<EditEvent> {
             return null;
           },
         ),
-        SizedBox(
+        const SizedBox(
           height: 10.0,
         )
       ],
@@ -76,8 +76,8 @@ class _EditEventState extends State<EditEvent> {
           maxLines: null,
           decoration: InputDecoration(
             labelText: "Description",
-            labelStyle:
-                TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+            labelStyle: const TextStyle(
+                color: Colors.black, fontWeight: FontWeight.w500),
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
           ),
@@ -88,7 +88,7 @@ class _EditEventState extends State<EditEvent> {
             return null;
           },
         ),
-        SizedBox(
+        const SizedBox(
           height: 10.0,
         )
       ],
@@ -102,8 +102,8 @@ class _EditEventState extends State<EditEvent> {
           controller: venueController,
           decoration: InputDecoration(
             labelText: "Venue",
-            labelStyle:
-                TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+            labelStyle: const TextStyle(
+                color: Colors.black, fontWeight: FontWeight.w500),
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
           ),
@@ -114,7 +114,7 @@ class _EditEventState extends State<EditEvent> {
             return null;
           },
         ),
-        SizedBox(
+        const SizedBox(
           height: 10.0,
         )
       ],
@@ -181,8 +181,8 @@ class _EditEventState extends State<EditEvent> {
 
   Widget buildDateTime() {
     return Container(
-      margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
-      padding: EdgeInsets.all(5.0),
+      margin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+      padding: const EdgeInsets.all(5.0),
       decoration: BoxDecoration(
           border: Border.all(color: Colors.black, width: 1),
           borderRadius: BorderRadius.circular(10.0)),
@@ -190,20 +190,20 @@ class _EditEventState extends State<EditEvent> {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           OutlinedButton(
-            style: ButtonStyle(alignment: Alignment.centerLeft),
+            style: const ButtonStyle(alignment: Alignment.centerLeft),
             child: Text(
               getDate(),
-              style:
-                  TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+              style: const TextStyle(
+                  color: Colors.black, fontWeight: FontWeight.w500),
             ),
             onPressed: () => pickDate(context),
           ),
           OutlinedButton(
-            style: ButtonStyle(alignment: Alignment.centerRight),
+            style: const ButtonStyle(alignment: Alignment.centerRight),
             child: Text(
               getTime(),
-              style:
-                  TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+              style: const TextStyle(
+                  color: Colors.black, fontWeight: FontWeight.w500),
             ),
             onPressed: () => pickTime(context),
           ),
@@ -248,7 +248,7 @@ class _EditEventState extends State<EditEvent> {
                 print("path is: ${path}");
                 print("filename is: ${fileName}");
               },
-              child: Text("Select Photo"),
+              child: const Text("Select Photo"),
             ),
             const SizedBox(
               width: 10.0,
@@ -257,10 +257,11 @@ class _EditEventState extends State<EditEvent> {
               child: Column(
                 children: [
                   _image == null
-                      ? Text("No file chosen")
+                      ? const Text("No file chosen")
                       : Text(
                           (_imageName!),
-                          style: TextStyle(overflow: TextOverflow.visible),
+                          style:
+                              const TextStyle(overflow: TextOverflow.visible),
                         )
                 ],
               ),
@@ -275,13 +276,13 @@ class _EditEventState extends State<EditEvent> {
   Widget buildUpdateButton() {
     return ElevatedButton(
       onPressed: () async {
-        print(titleController.text);
-        print(descriptionController.text);
-        print(venueController.text);
-        print(selectedDateToString);
-        print(selectedTimeToString);
-        print(_imageName);
-        print(_imagePath);
+        // print(titleController.text);
+        // print(descriptionController.text);
+        // print(venueController.text);
+        // print(selectedDateToString);
+        // print(selectedTimeToString);
+        // print(_imageName);
+        // print(_imagePath);
 
         if (_image == null) {
           try {
@@ -293,7 +294,7 @@ class _EditEventState extends State<EditEvent> {
               'time': selectedTimeToString,
             }, SetOptions(merge: true)).then((value) async {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
+                const SnackBar(
                   content: Text('event updated.'),
                   backgroundColor: Colors.green,
                 ),
@@ -301,21 +302,30 @@ class _EditEventState extends State<EditEvent> {
             });
             Navigator.pop(context);
           } on FirebaseException catch (e) {
-            print(e);
+            //print(e);
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text(
+                "Error occured",
+                style: TextStyle(fontSize: 20.0),
+              ),
+              backgroundColor: Colors.green,
+            ));
           }
         }
 
         if (_image != null) {
           try {
+            //updates the image
             await storage
                 .uploadFile(_image!, widget.eventId)
                 .then((value) async {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                 content: Text('image updated'),
                 backgroundColor: Colors.green,
               ));
 
               try {
+                //update the document
                 await _firestore.doc(widget.eventId).set({
                   'title': titleController.text,
                   'description': descriptionController.text,
@@ -324,7 +334,7 @@ class _EditEventState extends State<EditEvent> {
                   'time': selectedTimeToString,
                 }, SetOptions(merge: true)).then((value) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
+                    const SnackBar(
                       content: Text('event updated.'),
                       backgroundColor: Colors.green,
                     ),
@@ -332,15 +342,29 @@ class _EditEventState extends State<EditEvent> {
                   Navigator.pop(context);
                 });
               } on FirebaseException catch (e) {
-                print(e);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text(
+                    "Error updating document",
+                    style: TextStyle(fontSize: 20.0),
+                  ),
+                  backgroundColor: Colors.red,
+                ));
+                //print(e);
               }
             });
           } on FirebaseException catch (e) {
-            print(e);
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text(
+                "Error updating image",
+                style: TextStyle(fontSize: 20.0),
+              ),
+              backgroundColor: Colors.red,
+            ));
+            //print(e);
           }
         }
       },
-      child: Text("Update"),
+      child: const Center(child: Text("UPDATE")),
     );
   }
 
@@ -348,41 +372,45 @@ class _EditEventState extends State<EditEvent> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Edit Event"),
+        title: const Text("Edit Event"),
       ),
-      body: ListView(
-        padding: EdgeInsets.all(10.0),
-        children: [
-          Hero(
-            tag: widget.event.photoUrl,
-            child: Container(
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5.0),
-                  border: Border.all(
-                      color: Colors.black, width: 1, style: BorderStyle.solid)),
-              child: _image == null
-                  ? Image(
-                      image: NetworkImage(widget.event.photoUrl),
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height / 4,
-                      fit: BoxFit.cover,
-                    )
-                  : Image(
-                      image: FileImage(_image!),
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height / 4,
-                      fit: BoxFit.cover,
-                    ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          children: <Widget>[
+            Hero(
+              tag: widget.event.photoUrl,
+              child: Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5.0),
+                    border: Border.all(
+                        color: Colors.black,
+                        width: 1,
+                        style: BorderStyle.solid)),
+                child: _image == null
+                    ? Image(
+                        image: NetworkImage(widget.event.photoUrl),
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height / 4,
+                        fit: BoxFit.cover,
+                      )
+                    : Image(
+                        image: FileImage(_image!),
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height / 4,
+                        fit: BoxFit.cover,
+                      ),
+              ),
             ),
-          ),
-          SizedBox(height: 10.0),
-          buildTitle(),
-          buildDescription(),
-          buildVenue(),
-          buildDateTime(),
-          buildSelectPhoto(),
-          buildUpdateButton(),
-        ],
+            const SizedBox(height: 10.0),
+            buildTitle(),
+            buildDescription(),
+            buildVenue(),
+            buildDateTime(),
+            buildSelectPhoto(),
+            buildUpdateButton(),
+          ],
+        ),
       ),
     );
   }

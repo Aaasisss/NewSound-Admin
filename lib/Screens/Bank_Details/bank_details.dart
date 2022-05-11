@@ -27,8 +27,8 @@ class _BankDetailsState extends State<BankDetails> {
           maxLines: null,
           decoration: InputDecoration(
             labelText: "Account Name",
-            labelStyle:
-                TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+            labelStyle: const TextStyle(
+                color: Colors.black, fontWeight: FontWeight.w500),
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
           ),
@@ -42,7 +42,7 @@ class _BankDetailsState extends State<BankDetails> {
             return null;
           },
         ),
-        SizedBox(
+        const SizedBox(
           height: 10.0,
         )
       ],
@@ -59,8 +59,8 @@ class _BankDetailsState extends State<BankDetails> {
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
             labelText: "BSB",
-            labelStyle:
-                TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+            labelStyle: const TextStyle(
+                color: Colors.black, fontWeight: FontWeight.w500),
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
           ),
@@ -74,7 +74,7 @@ class _BankDetailsState extends State<BankDetails> {
             return null;
           },
         ),
-        SizedBox(
+        const SizedBox(
           height: 10.0,
         )
       ],
@@ -91,8 +91,8 @@ class _BankDetailsState extends State<BankDetails> {
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
             labelText: "Account Number",
-            labelStyle:
-                TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+            labelStyle: const TextStyle(
+                color: Colors.black, fontWeight: FontWeight.w500),
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
           ),
@@ -106,7 +106,7 @@ class _BankDetailsState extends State<BankDetails> {
             return null;
           },
         ),
-        SizedBox(
+        const SizedBox(
           height: 10.0,
         )
       ],
@@ -126,15 +126,14 @@ class _BankDetailsState extends State<BankDetails> {
               'bsb': accountBsbController.text.trim(),
               'name': accountNameController.text.trim()
             });
-            final message = "Updated";
-            final updateSnackBar = SnackBar(
+
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text(
-                message,
+                "Updated",
                 style: TextStyle(fontSize: 20.0),
               ),
               backgroundColor: Colors.green,
-            );
-            ScaffoldMessenger.of(context).showSnackBar(updateSnackBar);
+            ));
 
             //clear the fields
             setState(() {
@@ -144,12 +143,19 @@ class _BankDetailsState extends State<BankDetails> {
               accountNumberController.clear();
             });
           } catch (e) {
-            print(e);
+            //print(e);
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text(
+                "Error occured",
+                style: TextStyle(fontSize: 20.0),
+              ),
+              backgroundColor: Colors.green,
+            ));
           }
         }
       },
-      child: Text(
-        "Update",
+      child: const Text(
+        "UPDATE",
         style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
       ),
     );
@@ -180,7 +186,7 @@ class _BankDetailsState extends State<BankDetails> {
         future: _firestore.doc('accountDetails').get(),
         builder: ((context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
+            return const CircularProgressIndicator();
           }
           if (snapshot.connectionState == ConnectionState.done) {
             return Column(
@@ -192,9 +198,9 @@ class _BankDetailsState extends State<BankDetails> {
             );
           }
           if (snapshot.hasError) {
-            return Text(('Error!'));
+            return const Text(('Error!'));
           }
-          return Scaffold(
+          return const Scaffold(
             body: Center(
               child: Text(
                 'loading...',
@@ -226,9 +232,9 @@ class _BankDetailsState extends State<BankDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Bank Details')),
+      appBar: AppBar(title: const Text('Bank Details')),
       body: Container(
-        padding: EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(10.0),
         child: SingleChildScrollView(
             child: Form(
           key: formKey,

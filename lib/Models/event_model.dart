@@ -6,6 +6,7 @@ class Event {
   String time;
   String timeZone;
   String photoUrl;
+  dynamic serverTimeStamp;
 
   Event({
     this.title = '',
@@ -15,6 +16,7 @@ class Event {
     this.time = '',
     this.timeZone = '',
     this.photoUrl = '',
+    this.serverTimeStamp = '',
   });
 
   factory Event.fromJson(Map<String, dynamic> json) => Event(
@@ -25,6 +27,7 @@ class Event {
         time: json['time'],
         timeZone: json['timeZone'],
         photoUrl: json['photoUrl'],
+        serverTimeStamp: json['serverTimeStamp'],
       );
   Map<String, dynamic> toJson() => {
         'title': title,
@@ -34,5 +37,6 @@ class Event {
         'time': time,
         'timeZone': timeZone,
         'photoUrl': photoUrl,
+        'serverTimeStamp': serverTimeStamp,
       };
 }

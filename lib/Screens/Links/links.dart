@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:newsound_admin/Screens/Add_Events/add_events.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Links extends StatefulWidget {
@@ -28,8 +27,8 @@ class _LinksState extends State<Links> {
           maxLines: null,
           decoration: InputDecoration(
             labelText: "Facebook",
-            labelStyle:
-                TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+            labelStyle: const TextStyle(
+                color: Colors.black, fontWeight: FontWeight.w500),
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
           ),
@@ -43,7 +42,7 @@ class _LinksState extends State<Links> {
             return null;
           },
         ),
-        SizedBox(
+        const SizedBox(
           height: 10.0,
         )
       ],
@@ -59,8 +58,8 @@ class _LinksState extends State<Links> {
           maxLines: null,
           decoration: InputDecoration(
             labelText: "Instagram",
-            labelStyle:
-                TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+            labelStyle: const TextStyle(
+                color: Colors.black, fontWeight: FontWeight.w500),
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
           ),
@@ -74,7 +73,7 @@ class _LinksState extends State<Links> {
             return null;
           },
         ),
-        SizedBox(
+        const SizedBox(
           height: 10.0,
         )
       ],
@@ -90,8 +89,8 @@ class _LinksState extends State<Links> {
           maxLines: null,
           decoration: InputDecoration(
             labelText: "YouTube",
-            labelStyle:
-                TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+            labelStyle: const TextStyle(
+                color: Colors.black, fontWeight: FontWeight.w500),
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
           ),
@@ -105,7 +104,7 @@ class _LinksState extends State<Links> {
             return null;
           },
         ),
-        SizedBox(
+        const SizedBox(
           height: 10.0,
         )
       ],
@@ -130,17 +129,22 @@ class _LinksState extends State<Links> {
               'youtube': youtubeController.text.trim()
             });
 
-            final message = "Updated";
-            final updateSnackBar = SnackBar(
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text(
-                message,
+                "Updated",
                 style: TextStyle(fontSize: 20.0),
               ),
               backgroundColor: Colors.green,
-            );
-            ScaffoldMessenger.of(context).showSnackBar(updateSnackBar);
+            ));
           } catch (e) {
-            print(e);
+            //print(e);
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text(
+                "Error occured",
+                style: TextStyle(fontSize: 20.0),
+              ),
+              backgroundColor: Colors.red,
+            ));
           }
 
           setState(() {
@@ -151,7 +155,7 @@ class _LinksState extends State<Links> {
           });
         }
       },
-      child: Text("Update"),
+      child: const Text("UPDATE"),
     );
   }
 
@@ -165,7 +169,7 @@ class _LinksState extends State<Links> {
   void getCurrentData() async {
     final details = await _firestore.doc('socialLinks').get();
 
-    // print(details.data()!['name']);
+    //print(details.data()!['name']);
     // print(details.data()!['bsb']);
     // print(details.data()!['number']);
     setState(() {
@@ -180,7 +184,7 @@ class _LinksState extends State<Links> {
         future: _firestore.doc('socialLinks').get(),
         builder: ((context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
+            return const CircularProgressIndicator();
           }
           if (snapshot.connectionState == ConnectionState.done) {
             return Column(
@@ -192,9 +196,9 @@ class _LinksState extends State<Links> {
             );
           }
           if (snapshot.hasError) {
-            return Text(('Error!'));
+            return const Text(('Error!'));
           }
-          return Scaffold(
+          return const Scaffold(
             body: Center(
               child: Text(
                 'loading...',
@@ -226,9 +230,9 @@ class _LinksState extends State<Links> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Links')),
+      appBar: AppBar(title: const Text('Links')),
       body: Container(
-        padding: EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(10.0),
         child: SingleChildScrollView(
             child: Form(
           key: formKey,
