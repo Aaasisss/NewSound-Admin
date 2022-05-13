@@ -6,6 +6,7 @@ final List<Widget> homepageItemList = [
   const ItemAddEvents(),
   const ItemLinks(),
   const ItemBankDetails(),
+  const ItemFeedback(),
 ];
 
 class ItemSettings extends StatefulWidget {
@@ -113,6 +114,28 @@ class _ItemBankDetailsState extends State<ItemBankDetails> {
       child: const ListTile(
         leading: Icon(Icons.money),
         title: Text('Bank Details'),
+      ),
+    );
+  }
+}
+
+class ItemFeedback extends StatefulWidget {
+  const ItemFeedback({Key? key}) : super(key: key);
+
+  @override
+  State<ItemFeedback> createState() => _ItemFeedbackState();
+}
+
+class _ItemFeedbackState extends State<ItemFeedback> {
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () {
+        Navigator.of(context).pushNamed('/feedback');
+      },
+      child: const ListTile(
+        leading: Icon(Icons.feedback),
+        title: Text('View Feedbacks'),
       ),
     );
   }

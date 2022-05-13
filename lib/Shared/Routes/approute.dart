@@ -4,6 +4,7 @@ import 'package:newsound_admin/Screens/Home/home_page.dart';
 import 'package:newsound_admin/Screens/Links/links.dart';
 import 'package:newsound_admin/Screens/Settings/settings.dart';
 import 'package:newsound_admin/Screens/View_Events/view_events.dart';
+import 'package:newsound_admin/Screens/View_Feedbacks/view_feedback.dart';
 
 var approute = {
   '/add_events': (context) => const AddEvents(),
@@ -12,4 +13,5 @@ var approute = {
   '/links': (context) => const Links(),
   '/settings': (context) => const Settings(),
   '/view_events': (context) => const ViewEvents(),
+  '/feedback': (context) => const ViewFeedback(),
 };
