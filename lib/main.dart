@@ -1,5 +1,3 @@
-// ignore_for_file: unnecessary_const
-
 import 'package:flutter/material.dart';
 import 'package:newsound_admin/Screens/Login/login_page.dart';
 import 'package:newsound_admin/Services/auth.dart';
@@ -50,8 +48,8 @@ class _AppState extends State<App> {
         // Check for errors
         if (snapshot.hasError) {
           return const Scaffold(
-            body: const Center(
-              child: const Text(
+            body: Center(
+              child: Text(
                 'error!',
                 style: TextStyle(color: Colors.red),
               ),
@@ -66,8 +64,8 @@ class _AppState extends State<App> {
 
         // Otherwise, show something whilst waiting for initialization to complete
         return const Scaffold(
-          body: const Center(
-            child: const Text(
+          body: Center(
+            child: Text(
               'loading...',
               style: TextStyle(color: Colors.green),
             ),

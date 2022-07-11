@@ -12,36 +12,40 @@ class ViewFeedback extends StatefulWidget {
 class _ViewFeedbackState extends State<ViewFeedback> {
   final _firestore = FirebaseFirestore.instance.collection("feedback");
 
-  Widget feedbackWidget(
-    String feedbackText,
-    String id,
-  ) {
+  Widget feedbackWidget(String feedbackText, String id) {
     return GestureDetector(
       child: Card(
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-            side: const BorderSide(
-                color: Colors.black, width: 2, style: BorderStyle.solid)),
+          borderRadius: BorderRadius.circular(10),
+          side: const BorderSide(
+              color: Colors.black, width: 2, style: BorderStyle.solid),
+        ),
         shadowColor: Colors.black,
-        margin: EdgeInsets.fromLTRB(5, 5, 5, 5),
+        margin: const EdgeInsets.fromLTRB(5, 5, 5, 5),
         color: Colors.blueAccent,
         elevation: 50.0,
         child: Container(
-          padding: EdgeInsets.all(15.0),
-          child: Text(
-            feedbackText,
-            style: TextStyle(fontSize: 20.0),
+          padding: const EdgeInsets.all(15.0),
+          child: Container(
+            child: Text(
+              feedbackText,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 20.0),
+            ),
           ),
         ),
       ),
       onTap: () {
         Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: ((context) => EditFeedback(
-                      feedbackText: feedbackText,
-                      documentId: id,
-                    ))));
+          context,
+          MaterialPageRoute(
+            builder: ((context) => EditFeedback(
+                  feedbackText: feedbackText,
+                  documentId: id,
+                )),
+          ),
+        );
       },
     );
   }
@@ -49,7 +53,7 @@ class _ViewFeedbackState extends State<ViewFeedback> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("VIEW FEEDBACKS")),
+      appBar: AppBar(title: const Text("VIEW FEEDBACKS")),
       body: FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
         future: _firestore.orderBy("serverTimeStamp", descending: true).get(),
         builder: (context, asyncSnapshot) {

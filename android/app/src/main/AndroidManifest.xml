@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.newsound_admin">
    <application
-        android:label="newsound_admin"
+        android:label="New Sound Admin"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
